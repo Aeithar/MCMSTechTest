@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 
 namespace MCMSTechTest
 {
@@ -15,6 +16,7 @@ namespace MCMSTechTest
         private string _sqliteFilename;
         private int _page = 0;
         private int _totalPages = 0;
+        private string _whereClause;
 
         public MainWindow()
         {
@@ -29,6 +31,7 @@ namespace MCMSTechTest
             btnNext.IsEnabled = enabled;
             btnLast.IsEnabled = enabled;
             txtPageNo.IsEnabled = enabled;
+            txtSearch.IsEnabled = enabled;
         }
 
         public void SelectSQLiteFile_Click(object sender, RoutedEventArgs e)
@@ -61,12 +64,16 @@ namespace MCMSTechTest
                 sqlite_conn.Open();
                 SQLiteCommand sqlite_cmd;
                 sqlite_cmd = sqlite_conn.CreateCommand();
-                sqlite_cmd.CommandText = "SELECT COUNT(*) FROM safe_hashes";
-                var count = (long)sqlite_cmd.ExecuteScalar();
+                sqlite_cmd.CommandText = "SELECT COUNT(*) FROM safe_hashes " + _whereClause;
+                var count = Convert.ToDouble((long)sqlite_cmd.ExecuteScalar());
                 sqlite_conn.Close();
-                decimal pages = (count / 10);
-                _totalPages = (int)Math.Ceiling(pages);
+                _totalPages = (int)Math.Ceiling(count / 10);
                 lblOf.Content = string.Format("of {0}", _totalPages);
+                if (_totalPages == 0)
+                {
+                    _page = 0;
+                    txtPageNo.Text = _page.ToString();
+                }
             }
         }
 
@@ -77,7 +84,7 @@ namespace MCMSTechTest
             {
                 SQLiteCommand sqlite_cmd;
                 sqlite_cmd = sqlite_conn.CreateCommand();
-                sqlite_cmd.CommandText = string.Format("SELECT * FROM safe_hashes ORDER BY hash_id LIMIT 10 OFFSET {0}", (_page - 1) * 10);
+                sqlite_cmd.CommandText = string.Format("SELECT * FROM safe_hashes {1} ORDER BY hash_id LIMIT 10 OFFSET {0}", (_page - 1) * 10, _whereClause);
 
                 using (SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(sqlite_cmd.CommandText, sqlite_conn))
                 {
@@ -129,21 +136,60 @@ namespace MCMSTechTest
             }
         }
 
-        private void txtPageNo_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void txtPageNo_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            var pageText = txtPageNo.Text;
-            int pageNo;
-            if (int.TryParse(pageText,out pageNo))
+            if (e.Key == Key.Return)
             {
-                if (pageNo>0 && pageNo <= _totalPages)
+                var pageText = txtPageNo.Text;
+                int pageNo;
+                if (int.TryParse(pageText, out pageNo))
                 {
-                    _page = pageNo;
-                    ReadData();
-                    return;
+                    if (pageNo > 0 && pageNo <= _totalPages)
+                    {
+                        _page = pageNo;
+                        ReadData();
+                        return;
+                    }
+                }
+                txtPageNo.Text = _page.ToString();
+            }
+        }
+
+        private void txtSearch_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                var searchText = txtSearch.Text;
+                if (!string.IsNullOrWhiteSpace(searchText))
+                {
+                    var items = searchText.Split(',');
+                    var firstItem = true;
+                    if (items.Length > 0)
+                    {
+                        _whereClause = "WHERE sha1 IN (";
+                        foreach(var item in items)
+                        {
+                            if (!string.IsNullOrWhiteSpace(item.Trim()))
+                            if (!firstItem)
+                            {
+                                _whereClause += ",";
+                            }
+                            firstItem = false;
+                            _whereClause += string.Format("\"{0}\"", item.Trim());
+                        }
+                        _whereClause += ")";
+                    }
+                }
+                else
+                {
+                    _whereClause = "";
                 }
             }
+            _page = 1;
             txtPageNo.Text = _page.ToString();
-
+            GetTotalPages();
+            ReadData();
         }
+
     }
 }

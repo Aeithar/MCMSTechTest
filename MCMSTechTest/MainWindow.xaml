@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:MCMSTechTest"
         mc:Ignorable="d"
         WindowStartupLocation ="CenterScreen"
-        Title="SQLite Browser" Height="400" Width="498">
+        Title="SQLite Browser" Height="455" Width="498">
     <Grid Margin="10">
-        <DataGrid Name="dgBrowser" AutoGenerateColumns="True" Margin="23,43,23,80" IsReadOnly="True"></DataGrid>
+        <DataGrid Name="dgBrowser" AutoGenerateColumns="True" Margin="23,43,23,136" IsReadOnly="True"></DataGrid>
         <Button Name="btnSelectFile" Content="Select SQLite File" HorizontalAlignment="Left" Margin="23,10,0,0" VerticalAlignment="Top" Click="SelectSQLiteFile_Click"/>
         <Button Name="btnFirst" Content="  &lt;&lt;  " HorizontalAlignment="Left" Margin="23,303,0,0" VerticalAlignment="Top" Click="FirstPage_Click"/>
         <Button Name="btnPrevious" Content="    &lt;    " HorizontalAlignment="Left" Margin="70,303,0,0" VerticalAlignment="Top" Click="PrevPage_Click"/>
@@ -16,6 +16,8 @@
         <Button Name="btnLast" Content="  &gt;&gt;  " HorizontalAlignment="Left" Margin="415,303,0,0" VerticalAlignment="Top" Click="LastPage_Click"/>
         <Label Name="lblPage" Content="Page" HorizontalAlignment="Left" Margin="153,298,0,0" VerticalAlignment="Top" Height="29" Width="42"/>
         <Label Name="lblOf" Content="of 0" HorizontalAlignment="Left" Margin="282,298,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.7,0.843" Width="62"/>
-        <TextBox Name="txtPageNo" HorizontalAlignment="Center" Margin="0,303,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" TextChanged="txtPageNo_TextChanged"/>
+        <TextBox Name="txtPageNo" HorizontalAlignment="Center" Margin="0,303,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" KeyUp="txtPageNo_KeyUp"/>
+        <Label Name="lblSearch" Content="Search" HorizontalAlignment="Left" Margin="23,328,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="txtSearch" HorizontalAlignment="Left" Margin="73,332,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="376" Height="58" KeyUp="txtSearch_KeyUp" />
     </Grid>
 </Window>
